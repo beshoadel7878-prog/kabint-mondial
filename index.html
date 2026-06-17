@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0d12" />
+  <title>كابينة مونديال — غرفة تحكم محتوى كأس العالم</title>
+
+  <!-- PWA: installable + offline -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="icon" href="icons/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="كابينة مونديال" />
+  <meta name="description" content="غرفة عمليات يومية لفريق إنتاج فيديوهات كأس العالم: تنظيم الأخبار، نسخ المحتوى، وتوليد بوسترات جريدة عربية كلاسيكية." />
+
+  <!-- Open Graph / Twitter: richer link previews when the tool's URL is shared -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ar_AR" />
+  <meta property="og:title" content="كابينة مونديال — غرفة تحكم محتوى كأس العالم" />
+  <meta property="og:description" content="غرفة عمليات يومية لفريق إنتاج فيديوهات كأس العالم: تنظيم الأخبار، نسخ المحتوى، وتوليد بوسترات جريدة عربية كلاسيكية." />
+  <meta property="og:image" content="icons/icon-512.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="كابينة مونديال — غرفة تحكم محتوى كأس العالم" />
+  <meta name="twitter:description" content="غرفة عمليات يومية لفريق إنتاج فيديوهات كأس العالم." />
+
+  <!-- Fonts: self-hosted woff2 (offline-first). UI: Tajawal/Cairo — Vintage poster: Amiri, Aref Ruqaa. -->
+  <link rel="stylesheet" href="fonts/fonts.css" />
+
+  <!-- Stylesheets: base design system first, then per-section styles -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/editor.css" />
+  <link rel="stylesheet" href="css/teamview.css" />
+  <link rel="stylesheet" href="css/ai.css" />
+  <link rel="stylesheet" href="css/poster.css?v=20260617-3" />
+  <link rel="stylesheet" href="css/gallery.css" />
+
+  <!-- html2canvas for poster PNG export. Vendored locally so exports work offline. -->
+  <script src="vendor/html2canvas.min.js" defer></script>
+</head>
+<body>
+  <a href="#appMain" class="sr-only sr-only-focusable">تخطّي إلى المحتوى</a>
+  <!-- ============================ TOP BAR ============================ -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <div class="brand-mark" aria-hidden="true">⚽</div>
+      <div class="brand-text">
+        <span class="brand-title">كابينة مونديال</span>
+        <span class="brand-sub">غرفة تحكم محتوى كأس العالم</span>
+      </div>
+    </div>
+
+    <nav class="nav" id="mainNav" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="#/dashboard" data-route="dashboard"><span class="nav-ico">▦</span> لوحة التحكم</a>
+      <a class="nav-link" href="#/editor"    data-route="editor"><span class="nav-ico">✎</span> المحرر</a>
+      <a class="nav-link" href="#/team"      data-route="team"><span class="nav-ico">▣</span> عرض الفريق</a>
+      <a class="nav-link" href="#/ai"         data-route="ai"><span class="nav-ico">✦</span> مساعد الصياغة</a>
+      <a class="nav-link" href="#/poster"    data-route="poster"><span class="nav-ico">▤</span> مولد الجريدة</a>
+      <a class="nav-link" href="#/gallery"   data-route="gallery"><span class="nav-ico">◫</span> معرض البوسترات</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <button class="btn btn-ghost btn-sm" id="globalImportBtn" title="استيراد JSON"><span aria-hidden="true">⭳</span><span class="label-full">استيراد</span></button>
+      <button class="btn btn-gold btn-sm" id="globalExportBtn" title="تصدير JSON"><span aria-hidden="true">⭱</span><span class="label-full">تصدير</span></button>
+      <button class="btn btn-ghost btn-sm" id="globalSettingsBtn" title="الإعدادات" aria-label="الإعدادات"><span aria-hidden="true">⚙</span><span class="label-full">إعدادات</span></button>
+      <button class="nav-toggle" id="navToggle" aria-label="القائمة">☰</button>
+    </div>
+  </header>
+
+  <!-- ============================ VIEWS ============================ -->
+  <main class="app-main" id="appMain" tabindex="-1">
+    <section class="view" id="view-dashboard" aria-label="لوحة التحكم"></section>
+    <section class="view" id="view-editor"    aria-label="المحرر"></section>
+    <section class="view" id="view-team"       aria-label="عرض الفريق"></section>
+    <section class="view" id="view-ai"          aria-label="مساعد الصياغة"></section>
+    <section class="view" id="view-poster"     aria-label="مولد الجريدة"></section>
+    <section class="view" id="view-gallery"    aria-label="معرض البوسترات"></section>
+  </main>
+
+  <footer class="app-footer">
+    <span>كابينة مونديال © موسم كأس العالم — أداة إنتاج داخلية</span>
+    <span class="app-footer__hint">كل البيانات محفوظة محليًا في هذا المتصفح (localStorage). صدّر نسخة احتياطية بانتظام.</span>
+    <button class="app-footer__help" id="globalHelpBtn" type="button">؟ مساعدة واختصارات</button>
+  </footer>
+
+  <!-- Toast + modal mount points (managed by app.js) -->
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+  <div class="modal-root" id="modalRoot"></div>
+
+  <!-- Hidden file input reused for all JSON imports -->
+  <input type="file" id="jsonImportInput" accept="application/json,.json" hidden />
+
+  <!-- ============================ SCRIPTS ============================ -->
+  <!-- Load order matters: store -> optional data packs -> app -> page modules -->
+  <script src="js/store.js"></script>
+  <script src="js/worldcup-data.js?v=20260617-2"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/teamview.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/poster.js?v=20260617-3"></script>
+  <script src="js/gallery.js"></script>
+</body>
+</html>

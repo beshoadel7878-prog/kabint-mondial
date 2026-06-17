@@ -1,0 +1,146 @@
+/* =============================================================================
+ * editor.css — section-specific styles for "المحرر" (Admin Editor).
+ * Scoped under #view-editor so nothing leaks into other sections.
+ * Reuses base tokens (var(--gold), var(--card), ...) and shared classes.
+ * ========================================================================== */
+
+/* ----------------------------- two-column layout ----------------------------- */
+#view-editor .ed-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--gap);
+  align-items: start;
+}
+
+/* form is the main column; on desktop place it first (right in RTL) */
+#view-editor .ed-main { min-width: 0; }
+
+/* ----------------------------- mode chip ----------------------------- */
+#view-editor .ed-mode {
+  font-weight: 700;
+  border-color: var(--line);
+  color: var(--text-2);
+}
+#view-editor .ed-mode.is-edit {
+  color: var(--gold-2);
+  background: rgba(216, 179, 103, 0.12);
+  border-color: var(--gold-deep);
+}
+
+/* ----------------------------- dropzone extras ----------------------------- */
+#view-editor .ed-dz-ico { font-size: 30px; opacity: .7; margin-bottom: 6px; }
+#view-editor .ed-dz-text { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 2px; }
+#view-editor .dropzone .field-hint { margin-top: 4px; }
+
+/* ----------------------------- actions row ----------------------------- */
+#view-editor .ed-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#view-editor .ed-actions__spacer { flex: 1 1 auto; min-width: 8px; }
+
+#view-editor .ed-postsave {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-soft);
+  animation: pop .35s ease both;
+}
+
+/* ----------------------------- side list ----------------------------- */
+#view-editor .ed-side {
+  position: sticky;
+  top: 84px;
+  max-height: calc(100vh - 108px);
+  display: flex;
+  flex-direction: column;
+}
+#view-editor .ed-side__head { margin-bottom: 14px; }
+#view-editor .ed-side-search { margin-bottom: 12px; }
+#view-editor .ed-side-search .input { min-height: 42px; }
+
+#view-editor .ed-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-inline-end: 2px;
+  /* allow the inner list to scroll while the panel stays put */
+  min-height: 0;
+}
+
+#view-editor .ed-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: start;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--bg-2);
+  color: var(--text);
+  transition: .16s ease;
+}
+#view-editor .ed-row:hover {
+  border-color: var(--line);
+  background: var(--card-hover);
+  transform: translateX(-2px);
+}
+#view-editor .ed-row.is-active {
+  border-color: var(--gold-deep);
+  background: rgba(216, 179, 103, 0.10);
+  box-shadow: inset 0 0 0 1px rgba(216, 179, 103, 0.25);
+}
+#view-editor .ed-row .badge { flex-shrink: 0; }
+#view-editor .ed-row__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#view-editor .ed-row__score {
+  flex-shrink: 0;
+  font-family: var(--font-disp);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--gold);
+  background: var(--panel);
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  padding: 2px 8px;
+}
+
+#view-editor .ed-side__empty {
+  padding: 34px 18px;
+  margin-top: 4px;
+}
+#view-editor .ed-side__empty .empty-state__icon { font-size: 38px; }
+#view-editor .ed-side__no-results {
+  padding: 28px 16px;
+  margin-top: 10px;
+}
+
+/* ----------------------------- responsive ----------------------------- */
+@media (max-width: 980px) {
+  #view-editor .ed-layout { grid-template-columns: 1fr; }
+  #view-editor .ed-side {
+    position: static;
+    max-height: none;
+    order: -1; /* show saved list above the form on narrow screens */
+  }
+  #view-editor .ed-rows { max-height: 320px; }
+}
+
+@media (max-width: 560px) {
+  #view-editor .ed-actions { gap: 8px; }
+  #view-editor .ed-actions .btn { flex: 1 1 auto; }
+  #view-editor .ed-actions__spacer { display: none; }
+}

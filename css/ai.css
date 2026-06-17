@@ -1,0 +1,114 @@
+/* =============================================================================
+ * ai.css — section styles for "مساعد الصياغة" (AI Formatting Assistant)
+ * Scoped under #view-ai so nothing leaks into other sections.
+ * Reuses base tokens (var(--gold), var(--card), var(--text-dim), ...).
+ * ========================================================================== */
+
+/* ---- two-column layout: input | output ---- */
+#view-ai .ai-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+#view-ai .ai-pane { position: relative; }
+#view-ai .ai-pane__head { margin-bottom: 14px; gap: 10px; }
+#view-ai .ai-pane .section-title { margin-bottom: 0; }
+
+/* sticky output on tall screens so it stays visible while editing the raw text */
+@media (min-width: 981px) {
+  #view-ai .ai-pane--output { position: sticky; top: 84px; }
+}
+
+/* ---- mock / preliminary chip ---- */
+#view-ai .ai-mock-chip {
+  color: var(--gold-2);
+  border-color: var(--gold-deep);
+  background: rgba(216, 179, 103, 0.08);
+  font-weight: 600;
+}
+
+/* ---- raw textarea ---- */
+#view-ai .ai-raw {
+  min-height: 200px;
+  line-height: 1.9;
+  font-size: 15px;
+}
+
+#view-ai .ai-input-actions { margin-top: 14px; }
+#view-ai .ai-input-actions .btn-lg { flex: 1 1 auto; }
+#view-ai .ai-tip { margin-top: 12px; line-height: 1.6; }
+
+/* ---- processing (simulated AI) ---- */
+#view-ai .ai-processing {
+  text-align: center;
+  padding: 54px 20px;
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(420px 220px at 50% 0%, rgba(216, 179, 103, 0.08), transparent 70%),
+    rgba(255, 255, 255, 0.012);
+}
+#view-ai .ai-spinner {
+  font-size: 44px;
+  color: var(--gold);
+  text-shadow: 0 0 26px rgba(216, 179, 103, 0.45);
+}
+#view-ai .ai-processing__txt {
+  font-family: var(--font-disp);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--text);
+  margin: 14px 0 6px;
+}
+
+/* ---- empty placeholder tweaks ---- */
+#view-ai .ai-empty { padding: 48px 22px; }
+#view-ai .ai-empty .empty-state__icon { color: var(--gold); opacity: .7; }
+
+/* ---- formatted result ---- */
+#view-ai .ai-result { display: flex; flex-direction: column; gap: 14px; }
+#view-ai .ai-result__meta { gap: 8px; margin-bottom: 2px; }
+
+#view-ai .ai-result-field { margin-bottom: 0; }
+#view-ai .ai-field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#view-ai .ai-field-head .field-label { margin: 0; }
+#view-ai .ai-copy-one {
+  padding: 4px 12px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* gentle highlight so editable result fields read as "AI-filled" */
+#view-ai .ai-result .ai-field {
+  background: #11151f;
+  border-color: rgba(216, 179, 103, 0.18);
+}
+#view-ai .ai-result .ai-field:focus {
+  border-color: var(--gold-deep);
+}
+
+/* ---- bottom actions ---- */
+#view-ai .ai-actions {
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  gap: 10px;
+}
+#view-ai .ai-actions .btn { flex: 1 1 auto; }
+
+/* ---- responsive: stack columns ---- */
+@media (max-width: 980px) {
+  #view-ai .ai-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  #view-ai .ai-input-actions { flex-direction: column; align-items: stretch; }
+  #view-ai .ai-input-actions .btn { width: 100%; }
+  #view-ai .ai-actions { flex-direction: column; align-items: stretch; }
+}

@@ -1,0 +1,569 @@
+/* =============================================================================
+ * poster.css — section styles for "مولد الجريدة" (#view-poster)
+ * Scoped under #view-poster and the .poster-stage / .poster-* classes so nothing
+ * leaks into other sections. Reuses base tokens (var(--gold) ...).
+ *
+ * Two layers of styling:
+ *   1. The control-room UI (dark theme) — left controls + preview chrome.
+ *   2. The POSTER itself (#posterStage) — an aged Arabic newspaper, beige + black
+ *      ink only for the vintage default; tasteful variants for the other templates.
+ * ========================================================================== */
+
+/* ============================ layout ============================ */
+#view-poster .ps-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+#view-poster .ps-col-controls { min-width: 0; }
+#view-poster .ps-controls { display: block; }
+#view-poster .ps-controls .divider { margin: 18px 0; }
+#view-poster .ps-controls .section-title { margin-top: 4px; }
+
+/* dropzone field spacing */
+#view-poster .ps-dz-field { margin-top: 14px; }
+#view-poster .ps-dz-field .thumb-preview { margin-top: 10px; }
+#view-poster .dz-inner { font-size: 13.5px; }
+
+/* ============================ template buttons ============================ */
+#view-poster .tmpl-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+#view-poster .tmpl-btn {
+  padding: 9px 14px; border-radius: 999px;
+  border: 1px solid var(--line-soft); background: var(--bg-2); color: var(--text-2);
+  font-family: var(--font-ui); font-size: 13px; font-weight: 700;
+  transition: .16s ease;
+}
+#view-poster .tmpl-btn:hover { border-color: var(--line); color: var(--text); transform: translateY(-1px); }
+#view-poster .tmpl-btn.is-active {
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  color: #1a1304; border-color: transparent; box-shadow: var(--shadow-sm);
+}
+
+/* hi-res export toggle */
+#view-poster .ps-hires {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; color: var(--text-2);
+  cursor: pointer; user-select: none;
+}
+#view-poster .ps-hires input { accent-color: var(--gold); }
+
+/* ============================ print ============================ */
+@media print {
+  .topbar, .app-footer, .nav, .toast-stack, .modal-root,
+  #view-poster .page-head, #view-poster .ps-col-controls,
+  #view-poster .ps-preview-bar, #view-poster .ps-export-hint { display: none !important; }
+  .app-main, .view, #view-poster, #view-poster .ps-layout { display: block !important; margin: 0 !important; padding: 0 !important; }
+  #view-poster .ps-preview-col { position: static !important; }
+  #view-poster .poster-scaler {
+    border: none !important; box-shadow: none !important; background: #fff !important;
+    overflow: visible !important;
+  }
+  @page { margin: 8mm; }
+  html, body { background: #fff !important; }
+}
+
+/* ============================ export-size pills ============================ */
+#view-poster .size-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+#view-poster .size-btn {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 14px; border-radius: 14px;
+  border: 1px solid var(--line-soft); background: var(--bg-2); color: var(--text-2);
+  font-family: var(--font-ui); line-height: 1.1;
+  transition: .16s ease;
+}
+#view-poster .size-btn:hover { border-color: var(--line); color: var(--text); transform: translateY(-1px); }
+#view-poster .size-btn.is-active {
+  background: linear-gradient(180deg, var(--gold-2), var(--gold));
+  color: #1a1304; border-color: transparent; box-shadow: var(--shadow-sm);
+}
+#view-poster .size-btn__label { font-size: 13px; font-weight: 700; }
+#view-poster .size-btn__dim { font-size: 10.5px; opacity: .7; letter-spacing: .3px; }
+#view-poster .size-btn.is-active .size-btn__dim { opacity: .85; }
+
+/* ============================ preview column / chrome ============================ */
+#view-poster .ps-preview-col {
+  position: sticky; top: 76px;
+  min-width: 0;
+}
+#view-poster .ps-preview-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+#view-poster .ps-preview-title { font-family: var(--font-disp); font-weight: 800; font-size: 16px; color: var(--text); }
+#view-poster .ps-export-hint { margin-top: 10px; text-align: center; }
+
+/* The scaler holds the true-size stage and scales it down to fit the column.
+ * Its height is set in JS to the scaled stage height so nothing overlaps. */
+#view-poster .poster-scaler {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 12px, transparent 12px 24px),
+    linear-gradient(180deg, #0c0f16, #0a0c11);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow);
+  padding: 0;
+}
+
+/* ============================ THE POSTER STAGE ============================ */
+/* True pixel size for 1920x1080 export. Scaled via transform on render. */
+#view-poster #posterStage {
+  width: 1920px;
+  height: 1080px;
+  position: relative;
+  /* transform set in JS (scale + origin top right) */
+}
+
+#view-poster .poster-paper {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  box-sizing: border-box;
+  padding: 48px 72px 40px;
+  overflow: hidden;
+  color: #1a140c;
+  font-family: 'Amiri', 'Aref Ruqaa', serif;
+  direction: rtl;
+  letter-spacing: 0;
+  /* aged beige paper: warm base + fibre lines + faint noise + vignette */
+  background-color: #efe7d3;
+  background-image:
+    radial-gradient(ellipse at center, rgba(255,255,255,0) 70%, rgba(86,62,28,.12) 100%),
+    radial-gradient(120% 80% at 50% -10%, rgba(255,250,235,.55), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(120,96,60,.045) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, rgba(120,96,60,.03) 0 2px, transparent 2px 6px),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.42  0 0 0 0 0.33  0 0 0 0 0.18  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"),
+    linear-gradient(180deg, #f3ecda, #e7dcc2);
+  box-shadow: none;
+}
+
+/* faint irregular ink blotches */
+#view-poster .poster-ink {
+  position: absolute; pointer-events: none; opacity: .28;
+}
+#view-poster .poster-ink--1 {
+  width: 220px; height: 180px; top: 12%; left: -40px;
+  background: radial-gradient(closest-side, rgba(40,28,12,.16), transparent 70%);
+  transform: rotate(-12deg);
+}
+#view-poster .poster-ink--2 {
+  width: 260px; height: 200px; bottom: 8%; right: -60px;
+  background: radial-gradient(closest-side, rgba(40,28,12,.13), transparent 70%);
+  transform: rotate(18deg);
+}
+
+/* ---- masthead ---- */
+#view-poster .poster-masthead { text-align: center; position: relative; z-index: 1; margin-bottom: 18px; }
+#view-poster .poster-masthead__name {
+  font-family: 'Aref Ruqaa', 'Amiri', serif;
+  font-weight: 700; font-size: 82px; line-height: 1.14; letter-spacing: 0;
+  color: #15100a;
+  transform: translateY(-36px);
+  margin-bottom: 12px;
+}
+#view-poster .poster-masthead__sub {
+  font-size: 22px; letter-spacing: 0; color: #3a2c18;
+  margin-top: 8px; font-weight: 400; line-height: 1.35;
+}
+#view-poster .poster-rule { width: 100%; }
+#view-poster .poster-rule--double {
+  height: 7px; margin: 10px 0 8px;
+  border-top: 3px solid #1a140c; border-bottom: 1px solid #1a140c;
+}
+#view-poster .poster-rule--thin {
+  height: 1px; background: #2a2014; margin: 10px 0; opacity: .8;
+}
+
+#view-poster .poster-issueline {
+  display: flex; align-items: center; gap: 16px; margin-top: 10px;
+  font-size: 18px; color: #2c2010;
+}
+#view-poster .poster-issueline__rule { flex: 1; height: 2px; background: #2a2014; opacity: .7; }
+#view-poster .poster-issueline__side { white-space: nowrap; font-size: 18px; }
+#view-poster .poster-issueline__mid { white-space: nowrap; font-weight: 700; }
+
+/* ---- body / blocks ---- */
+#view-poster .poster-body { position: relative; z-index: 1; }
+#view-poster .poster-block { display: flex; gap: 42px; align-items: flex-start; }
+#view-poster .poster-block--lead .poster-text-col,
+#view-poster .poster-block--result .poster-text-col { flex: 1.15; }
+#view-poster .poster-fig-col { flex: 0 0 42%; max-width: 42%; }
+#view-poster .poster-fig-col--sm { flex: 0 0 330px; max-width: 330px; }
+#view-poster .poster-text-col { flex: 1; min-width: 0; }
+
+#view-poster .poster-headline {
+  font-family: 'Amiri', serif; font-weight: 700;
+  font-size: 68px; line-height: 1.22; color: #100c06; letter-spacing: 0;
+  margin-bottom: 14px;
+}
+#view-poster .poster-subhead {
+  font-family: 'Amiri', serif; font-weight: 700; font-size: 30px; line-height: 1.36;
+  color: #241a0e; margin-bottom: 8px;
+}
+#view-poster .poster-desc {
+  font-family: 'Amiri', serif; font-size: 23px; line-height: 1.5;
+  color: #1e1609; text-align: justify; text-justify: inter-word;
+  -webkit-hyphens: auto; hyphens: auto;
+}
+
+#view-poster .poster-divider-h {
+  height: 6px; margin: 18px 0;
+  border-top: 3px double #1a140c; border-bottom: 1px solid #1a140c;
+}
+
+#view-poster .poster-block--second .poster-text-col { flex: 1; }
+#view-poster .poster-second-head {
+  font-family: 'Amiri', serif; font-weight: 700; font-size: 36px; line-height: 1.32;
+  color: #15100a; margin-bottom: 10px;
+}
+#view-poster .poster-second-desc {
+  font-family: 'Amiri', serif; font-size: 21px; line-height: 1.45;
+  color: #20180c; text-align: justify;
+}
+
+/* ---- figure / image: B&W + halftone print ---- */
+#view-poster .poster-figure { margin: 0; }
+#view-poster .poster-img-wrap {
+  /* height via padding-top (NOT aspect-ratio): html2canvas 1.4.1 ignores
+     aspect-ratio and would collapse the image to 0px in the exported PNG. */
+  position: relative; width: 100%; height: 0; padding-top: 56.25%; /* 16:9 */
+  aspect-ratio: 16 / 9; overflow: hidden;
+  border: 1px solid #14100a;
+  box-shadow: 0 0 0 6px #efe7d3, 0 0 0 7px #14100a;
+  background: #d8cdb4;
+}
+#view-poster .poster-figure--portrait .poster-img-wrap { padding-top: 133.333%; aspect-ratio: 3 / 4; }
+#view-poster .poster-figure--sm .poster-img-wrap { padding-top: 100%; aspect-ratio: 1 / 1; }
+#view-poster .poster-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  /* The B&W + sepia + contrast newsprint tone is baked into the image pixels in
+     toGrayscale() (js/poster.js) so the exported PNG matches this preview exactly.
+     Do NOT add a CSS filter here: html2canvas 1.4.1 drops filters and the export
+     would no longer match. */
+  filter: none;
+}
+#view-poster .poster-img-wrap.is-empty { background: #d8cdb4; }
+#view-poster .poster-img-placeholder {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: 'Amiri', serif; font-size: 26px; color: rgba(40,30,16,.4);
+  letter-spacing: 0;
+}
+/* halftone printed dot overlay — no mix-blend-mode so it survives html2canvas export */
+#view-poster .poster-halftone {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(20,14,8,.5) 26%, transparent 27%);
+  background-size: 5px 5px;
+  opacity: .17;
+}
+#view-poster .poster-caption {
+  font-family: 'Amiri', serif; font-style: italic; font-size: 19px;
+  color: #2c2112; text-align: center; margin-top: 14px; line-height: 1.4;
+}
+
+/* placeholder ink (light gray) — never saved as content */
+#view-poster .is-ph,
+#view-poster .poster-caption.is-ph { color: rgba(40,30,16,.34) !important; font-style: italic; }
+
+/* ---- footer ---- */
+#view-poster .poster-footer {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 18px; margin-top: 18px;
+  font-family: 'Amiri', serif; font-size: 17px; color: #3a2c18;
+}
+#view-poster .poster-footer__rule { flex: 1; height: 2px; background: #2a2014; opacity: .55; }
+#view-poster .poster-footer__txt { white-space: nowrap; letter-spacing: 0; }
+
+/* ============================ TEMPLATE: breaking ============================ */
+/* Newsprint, with a heavy black banner; a single dark-red accent allowed. */
+#view-poster .tmpl-breaking .poster-breaking-bar {
+  background: #1a140c; color: #efe7d3; text-align: center;
+  font-family: 'Aref Ruqaa', 'Amiri', serif; font-weight: 700;
+  font-size: 34px; letter-spacing: 0; padding: 8px 0; margin-bottom: 10px;
+  border-top: 4px solid #8c1f12; border-bottom: 4px solid #8c1f12;
+}
+#view-poster .tmpl-breaking .poster-breaking-bar span { display: inline-block; }
+#view-poster .tmpl-breaking .poster-masthead__name { font-size: 68px; }
+#view-poster .tmpl-breaking .poster-headline { color: #6e160c; }
+#view-poster .tmpl-breaking .poster-rule--double { border-top-color: #8c1f12; }
+
+/* ============================ TEMPLATE: result ============================ */
+#view-poster .tmpl-result .poster-scoreboard {
+  margin: 12px 0 8px;
+  border: 3px double #1a140c; padding: 12px 20px; text-align: center;
+  background: rgba(26,20,12,.04);
+}
+#view-poster .tmpl-result .poster-scoreboard__line {
+  font-family: 'Aref Ruqaa', 'Amiri', serif; font-weight: 700;
+  font-size: 54px; line-height: 1.05; color: #100c06; letter-spacing: 0;
+}
+#view-poster .tmpl-result .poster-headline { font-size: 56px; }
+
+/* ============================ TEMPLATE: player ============================ */
+#view-poster .tmpl-player .poster-body--player .poster-block--player {
+  gap: 44px; align-items: flex-start;
+}
+#view-poster .tmpl-player .poster-fig-col--portrait { flex: 0 0 34%; max-width: 34%; }
+#view-poster .tmpl-player .poster-headline--player { font-size: 68px; }
+#view-poster .tmpl-player .poster-figure--portrait .poster-img-wrap { padding-top: 115%; aspect-ratio: 20 / 23; }
+
+/* ============================ TEMPLATE: final ============================ */
+#view-poster .tmpl-final .poster-paper {
+  box-shadow:
+    inset 0 0 0 10px rgba(26,20,12,.9),
+    inset 0 0 0 16px rgba(140,108,40,.4);
+}
+#view-poster .tmpl-final .poster-final-banner {
+  text-align: center; margin-bottom: 10px;
+  font-family: 'Aref Ruqaa', 'Amiri', serif; font-weight: 700;
+  font-size: 34px; letter-spacing: 0; color: #6e160c;
+}
+#view-poster .tmpl-final .poster-final-banner span {
+  display: inline-block; padding: 6px 26px;
+  border-top: 3px solid #8c6c28; border-bottom: 3px solid #8c6c28;
+}
+#view-poster .tmpl-final .poster-masthead__name { font-size: 84px; color: #100c06; }
+#view-poster .tmpl-final .poster-headline { font-size: 68px; }
+
+/* ============================ TEMPLATE: double (two stories) ============================ */
+/* Two equal stories stacked vertically; the image stays BESIDE the text (does NOT
+   reflow to a column on tall sizes) so it always reads like the reference page.
+   Base values are tuned for the default landscape (1920×1080) so two full stories
+   + masthead + footer fit without clipping; the tall sizes get larger photos. */
+#view-poster .tmpl-double .poster-body--double { display: flex; flex-direction: column; }
+#view-poster .tmpl-double .poster-block--story { display: flex; gap: 38px; align-items: flex-start; }
+#view-poster .tmpl-double .poster-block--story .poster-text-col { flex: 1.15; min-width: 0; }
+#view-poster .tmpl-double .poster-block--story .poster-fig-col { flex: 0 0 31%; max-width: 31%; }
+#view-poster .tmpl-double .poster-masthead { margin-bottom: 10px; }
+#view-poster .tmpl-double .poster-masthead__name { font-size: 66px; transform: translateY(-22px); }
+#view-poster .tmpl-double .poster-headline { font-size: 46px; line-height: 1.18; margin-bottom: 10px; }
+#view-poster .tmpl-double .poster-subhead { display: none; }
+#view-poster .tmpl-double .poster-desc { font-size: 21px; line-height: 1.46; }
+#view-poster .tmpl-double .poster-rule--thin { margin: 6px 0 10px; }
+#view-poster .tmpl-double .poster-divider-h { margin: 14px 0; }
+#view-poster .tmpl-double .poster-caption { margin-top: 10px; }
+
+/* The generic per-size reflow rules below force `.poster-block`/`.poster-fig-col`
+   to stack into a column on the tall sizes. For the double template we override
+   that so each story KEEPS its image beside the text on every size (matching the
+   reference). The extra `.tmpl-double` class gives these higher specificity. */
+#view-poster #posterStage[data-size="story"].tmpl-double .poster-block--story,
+#view-poster #posterStage[data-size="portrait"].tmpl-double .poster-block--story,
+#view-poster #posterStage[data-size="square"].tmpl-double .poster-block--story {
+  flex-direction: row; gap: 40px;
+}
+#view-poster #posterStage[data-size="story"].tmpl-double .poster-block--story .poster-fig-col,
+#view-poster #posterStage[data-size="portrait"].tmpl-double .poster-block--story .poster-fig-col,
+#view-poster #posterStage[data-size="square"].tmpl-double .poster-block--story .poster-fig-col {
+  flex: 0 0 40%; max-width: 40%; width: auto; order: 0;
+}
+#view-poster #posterStage[data-size="story"].tmpl-double .poster-masthead__name,
+#view-poster #posterStage[data-size="portrait"].tmpl-double .poster-masthead__name { font-size: 74px; }
+#view-poster #posterStage[data-size="story"].tmpl-double .poster-headline { font-size: 60px; }
+#view-poster #posterStage[data-size="portrait"].tmpl-double .poster-headline { font-size: 54px; }
+#view-poster #posterStage[data-size="story"].tmpl-double .poster-desc { font-size: 26px; line-height: 1.5; }
+#view-poster #posterStage[data-size="portrait"].tmpl-double .poster-desc { font-size: 24px; line-height: 1.48; }
+
+/* ythumb is very short (1280×720): keep the double layout but compact so two
+   stories still fit. */
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-masthead { margin-bottom: 4px; }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-masthead__name { font-size: 38px; transform: translateY(-8px); }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-block--story .poster-fig-col { flex: 0 0 26%; max-width: 26%; }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-headline { font-size: 30px; line-height: 1.14; margin-bottom: 6px; }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-desc { font-size: 15px; line-height: 1.34; }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-divider-h { margin: 8px 0; }
+#view-poster #posterStage[data-size="ythumb"].tmpl-double .poster-caption { margin-top: 5px; font-size: 13px; }
+
+/* ---- defensive text fitting for long Arabic headlines ---- */
+#view-poster .poster-masthead__name.is-fit-1 { font-size: 76px; line-height: 1.18; }
+#view-poster .poster-masthead__name.is-fit-2 { font-size: 62px; line-height: 1.24; }
+#view-poster .poster-headline.is-fit-1 { font-size: 62px; line-height: 1.26; }
+#view-poster .poster-headline.is-fit-2 { font-size: 50px; line-height: 1.3; }
+#view-poster .poster-headline--player.is-fit-1 { font-size: 64px; }
+#view-poster .poster-headline--player.is-fit-2 { font-size: 52px; }
+#view-poster .poster-subhead.is-fit-1 { font-size: 29px; line-height: 1.42; }
+#view-poster .poster-subhead.is-fit-2 { font-size: 25px; line-height: 1.48; }
+#view-poster .poster-second-head.is-fit-1 { font-size: 34px; line-height: 1.38; }
+#view-poster .poster-second-head.is-fit-2 { font-size: 29px; line-height: 1.44; }
+#view-poster .poster-headline,
+#view-poster .poster-subhead,
+#view-poster .poster-second-head,
+#view-poster .poster-masthead__name {
+  overflow-wrap: anywhere;
+  letter-spacing: 0;
+}
+
+#view-poster .poster-stage,
+#view-poster .poster-stage * {
+  font-kerning: normal;
+  font-variant-ligatures: normal;
+  text-rendering: optimizeLegibility;
+}
+
+/* Extra breathing room only for the off-screen PNG capture clone. html2canvas
+   measures Arabic font metrics tighter than Chrome's normal preview renderer. */
+#view-poster .poster-export-stage .poster-masthead__name { line-height: 1.24; }
+#view-poster .poster-export-stage .poster-masthead__sub { margin-top: 12px; line-height: 1.5; }
+#view-poster .poster-export-stage .poster-issueline { margin-top: 16px; }
+#view-poster .poster-export-stage .poster-headline { line-height: 1.34; margin-bottom: 22px; }
+#view-poster .poster-export-stage .poster-subhead { line-height: 1.5; margin-bottom: 14px; }
+#view-poster .poster-export-stage .poster-second-head { line-height: 1.46; margin-bottom: 14px; }
+#view-poster .poster-export-stage,
+#view-poster .poster-export-stage * { letter-spacing: 0 !important; }
+
+/* html2canvas 1.4.1 cannot rasterize the inline SVG feTurbulence grain in the
+   paper background, so the export clone uses the same gradient layers WITHOUT it.
+   The newsprint grain is re-added directly to the canvas in normalizeCanvas(). */
+#view-poster .poster-export-stage .poster-paper {
+  background-image:
+    radial-gradient(ellipse at center, rgba(255,255,255,0) 70%, rgba(86,62,28,.12) 100%),
+    radial-gradient(120% 80% at 50% -10%, rgba(255,250,235,.55), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(120,96,60,.045) 0 2px, transparent 2px 5px),
+    repeating-linear-gradient(90deg, rgba(120,96,60,.03) 0 2px, transparent 2px 6px),
+    linear-gradient(180deg, #f3ecda, #e7dcc2);
+}
+
+/* Spread-only box-shadows render unreliably in html2canvas; reproduce the image's
+   double frame (6px beige ring + 1px dark edge) with an outline + offset, which
+   html2canvas renders faithfully. The offset gap shows the beige paper. */
+#view-poster .poster-export-stage .poster-img-wrap {
+  box-shadow: none;
+  outline: 1px solid #14100a;
+  outline-offset: 5px;
+}
+
+/* The "final" template's decorative frame uses an INSET box-shadow, which
+   html2canvas 1.4.1 mis-renders by flooding the whole paper with the shadow
+   colour (the export came out dark brown). Reproduce the dark + gold double
+   frame with pseudo-element borders on the export clone only. */
+#view-poster .poster-export-stage.tmpl-final .poster-paper { box-shadow: none; }
+#view-poster .poster-export-stage.tmpl-final .poster-paper::before {
+  content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+  pointer-events: none; border: 10px solid rgba(26,20,12,.9);
+}
+#view-poster .poster-export-stage.tmpl-final .poster-paper::after {
+  content: ""; position: absolute; top: 10px; right: 10px; bottom: 10px; left: 10px;
+  pointer-events: none; border: 6px solid rgba(140,108,40,.4);
+}
+
+/* ============================ EXPORT-SIZE REFLOW ============================ */
+/* Default (landscape) keeps the original 1920×1080 geometry above — untouched.
+ * Each alternate size overrides the true pixel box of #posterStage + .poster-paper
+ * and reflows the body so every template still reads well and keeps the vintage
+ * look. The capture clone inherits these because it carries the same [data-size]. */
+
+/* ---- SQUARE 1080×1080 ---- */
+#view-poster #posterStage[data-size="square"],
+#view-poster #posterStage[data-size="square"] .poster-paper {
+  width: 1080px; height: 1080px;
+}
+#view-poster #posterStage[data-size="square"] .poster-paper { padding: 44px 56px 36px; }
+#view-poster #posterStage[data-size="square"] .poster-block--lead,
+#view-poster #posterStage[data-size="square"] .poster-block--result {
+  flex-direction: column; gap: 22px;
+}
+#view-poster #posterStage[data-size="square"] .poster-block--lead .poster-fig-col,
+#view-poster #posterStage[data-size="square"] .poster-block--result .poster-fig-col {
+  flex: none; max-width: 100%; width: 100%; order: -1;   /* image above text */
+}
+#view-poster #posterStage[data-size="square"] .poster-block--second { gap: 24px; }
+#view-poster #posterStage[data-size="square"] .poster-masthead__name { font-size: 64px; transform: translateY(-22px); }
+#view-poster #posterStage[data-size="square"] .poster-headline { font-size: 52px; }
+#view-poster #posterStage[data-size="square"] .poster-divider-h { margin: 14px 0; }
+
+/* ---- STORY 1080×1920 (tall) ---- */
+#view-poster #posterStage[data-size="story"],
+#view-poster #posterStage[data-size="story"] .poster-paper {
+  width: 1080px; height: 1920px;
+}
+#view-poster #posterStage[data-size="story"] .poster-paper { padding: 60px 60px 52px; }
+#view-poster #posterStage[data-size="story"] .poster-block,
+#view-poster #posterStage[data-size="story"] .poster-block--player {
+  flex-direction: column; gap: 30px;
+}
+#view-poster #posterStage[data-size="story"] .poster-fig-col,
+#view-poster #posterStage[data-size="story"] .poster-fig-col--portrait,
+#view-poster #posterStage[data-size="story"] .poster-fig-col--sm {
+  flex: none; max-width: 100%; width: 100%; order: -1;   /* image stacked above text */
+}
+#view-poster #posterStage[data-size="story"] .poster-masthead { margin-bottom: 26px; }
+#view-poster #posterStage[data-size="story"] .poster-masthead__name { font-size: 78px; transform: translateY(-30px); }
+#view-poster #posterStage[data-size="story"] .poster-headline { font-size: 72px; line-height: 1.2; }
+#view-poster #posterStage[data-size="story"] .poster-subhead { font-size: 34px; }
+#view-poster #posterStage[data-size="story"] .poster-desc { font-size: 28px; line-height: 1.55; }
+#view-poster #posterStage[data-size="story"] .poster-second-head { font-size: 42px; }
+#view-poster #posterStage[data-size="story"] .poster-second-desc { font-size: 26px; line-height: 1.5; }
+#view-poster #posterStage[data-size="story"] .poster-caption { font-size: 24px; }
+#view-poster #posterStage[data-size="story"] .poster-divider-h { margin: 24px 0; }
+
+/* ---- YOUTUBE THUMB 1280×720 (compressed masthead, punchy headline) ---- */
+#view-poster #posterStage[data-size="ythumb"],
+#view-poster #posterStage[data-size="ythumb"] .poster-paper {
+  width: 1280px; height: 720px;
+}
+#view-poster #posterStage[data-size="ythumb"] .poster-paper { padding: 26px 48px 24px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-masthead { margin-bottom: 10px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-masthead__name { font-size: 48px; transform: translateY(-12px); margin-bottom: 4px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-masthead__sub { font-size: 18px; margin-top: 2px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-rule--double { margin: 6px 0 4px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-issueline { margin-top: 6px; font-size: 15px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-block { gap: 30px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-headline { font-size: 58px; line-height: 1.12; margin-bottom: 8px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-subhead { font-size: 26px; margin-bottom: 6px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-desc { font-size: 20px; line-height: 1.4; }
+#view-poster #posterStage[data-size="ythumb"] .poster-divider-h { margin: 10px 0; }
+#view-poster #posterStage[data-size="ythumb"] .poster-block--second { gap: 24px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-second-head { font-size: 28px; margin-bottom: 6px; }
+#view-poster #posterStage[data-size="ythumb"] .poster-second-desc { font-size: 18px; line-height: 1.36; }
+#view-poster #posterStage[data-size="ythumb"] .poster-footer { margin-top: 10px; font-size: 14px; }
+
+/* ---- PORTRAIT 1080×1350 (4:5) ---- */
+#view-poster #posterStage[data-size="portrait"],
+#view-poster #posterStage[data-size="portrait"] .poster-paper {
+  width: 1080px; height: 1350px;
+}
+#view-poster #posterStage[data-size="portrait"] .poster-paper { padding: 52px 58px 44px; }
+#view-poster #posterStage[data-size="portrait"] .poster-block,
+#view-poster #posterStage[data-size="portrait"] .poster-block--player {
+  flex-direction: column; gap: 26px;
+}
+#view-poster #posterStage[data-size="portrait"] .poster-fig-col,
+#view-poster #posterStage[data-size="portrait"] .poster-fig-col--portrait,
+#view-poster #posterStage[data-size="portrait"] .poster-fig-col--sm {
+  flex: none; max-width: 100%; width: 100%; order: -1;   /* image stacked above text */
+}
+#view-poster #posterStage[data-size="portrait"] .poster-masthead { margin-bottom: 22px; }
+#view-poster #posterStage[data-size="portrait"] .poster-masthead__name { font-size: 72px; transform: translateY(-26px); }
+#view-poster #posterStage[data-size="portrait"] .poster-headline { font-size: 64px; line-height: 1.2; }
+#view-poster #posterStage[data-size="portrait"] .poster-subhead { font-size: 32px; }
+#view-poster #posterStage[data-size="portrait"] .poster-desc { font-size: 26px; line-height: 1.5; }
+#view-poster #posterStage[data-size="portrait"] .poster-second-head { font-size: 38px; }
+#view-poster #posterStage[data-size="portrait"] .poster-second-desc { font-size: 24px; line-height: 1.46; }
+#view-poster #posterStage[data-size="portrait"] .poster-caption { font-size: 22px; }
+#view-poster #posterStage[data-size="portrait"] .poster-divider-h { margin: 20px 0; }
+
+/* For the stacked sizes, keep the small/portrait figures from being oversized
+ * once they span the full column width. */
+#view-poster #posterStage[data-size="story"] .poster-figure--portrait .poster-img-wrap,
+#view-poster #posterStage[data-size="portrait"] .poster-figure--portrait .poster-img-wrap,
+#view-poster #posterStage[data-size="square"] .poster-figure--portrait .poster-img-wrap {
+  padding-top: 75%; aspect-ratio: 4 / 3;   /* avoid an over-tall portrait when full width */
+}
+
+/* ============================ responsive ============================ */
+@media (max-width: 1000px) {
+  #view-poster .ps-layout { grid-template-columns: 1fr; }
+  #view-poster .ps-preview-col { position: static; }
+}
+@media (max-width: 560px) {
+  #view-poster .ps-preview-bar { flex-direction: column; align-items: stretch; }
+  #view-poster .ps-preview-bar .row { justify-content: stretch; }
+  #view-poster .ps-preview-bar .row .btn { flex: 1; }
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="كابينة مونديال">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11151f"/>
+      <stop offset="1" stop-color="#0b0d12"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0d896"/>
+      <stop offset="1" stop-color="#c8a24a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="22" y="22" width="468" height="468" rx="94" fill="none" stroke="url(#gold)" stroke-width="6" opacity="0.45"/>
+  <!-- football -->
+  <circle cx="256" cy="226" r="116" fill="url(#gold)"/>
+  <polygon points="256,172 295,201 280,247 232,247 217,201" fill="#0b0d12"/>
+  <g stroke="#0b0d12" stroke-width="11" fill="none" stroke-linecap="round">
+    <path d="M256,172 L256,138"/>
+    <path d="M295,201 L329,184"/>
+    <path d="M280,247 L299,285"/>
+    <path d="M232,247 L213,285"/>
+    <path d="M217,201 L183,184"/>
+  </g>
+  <!-- newspaper masthead lines -->
+  <g fill="url(#gold)">
+    <rect x="146" y="382" width="220" height="15" rx="7.5"/>
+    <rect x="170" y="414" width="172" height="11" rx="5.5" opacity="0.82"/>
+    <rect x="192" y="442" width="128" height="11" rx="5.5" opacity="0.62"/>
+  </g>
+</svg>
