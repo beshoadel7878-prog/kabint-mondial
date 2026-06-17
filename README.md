@@ -43,8 +43,9 @@ index.html?demo=1
 التطبيق ملفات ثابتة بالكامل (لا build)، فيمكن نشره مباشرة:
 
 1. ارفع المجلد إلى مستودع GitHub.
-2. من إعدادات المستودع: **Settings → Pages** اختر **GitHub Actions** كمصدر النشر، أو اختر فرع `main` والمجلد `/ (root)`.
-3. بعد أول نشر، الموقع سيكون متاحًا هنا:
+2. من إعدادات المستودع: **Settings → Pages** اختر **Deploy from a branch**.
+3. اختر فرع `main` والمجلد `/ (root)`، أو فرع `gh-pages` والمجلد `/ (root)`.
+4. بعد أول نشر، الموقع سيكون متاحًا هنا:
 
 ```text
 https://beshoadel7878-prog.github.io/kabint-mondial/
