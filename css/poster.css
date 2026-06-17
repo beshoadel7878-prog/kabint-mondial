@@ -50,6 +50,15 @@
 }
 #view-poster .ps-hires input { accent-color: var(--gold); }
 
+/* show/hide toggles for the masthead's auto elements (date, "today's edition") */
+#view-poster .ps-checks { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+#view-poster .ps-check {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; color: var(--text-2);
+  cursor: pointer; user-select: none;
+}
+#view-poster .ps-check input { accent-color: var(--gold); }
+
 /* ============================ print ============================ */
 @media print {
   .topbar, .app-footer, .nav, .toast-stack, .modal-root,
@@ -268,9 +277,11 @@
   color: #2c2112; text-align: center; margin-top: 14px; line-height: 1.4;
 }
 
-/* placeholder ink (light gray) — never saved as content */
-#view-poster .is-ph,
-#view-poster .poster-caption.is-ph { color: rgba(40,30,16,.34) !important; font-style: italic; }
+/* Empty fields are placeholders, not content — hide them completely from the
+   poster (both the live preview and the exported PNG). This lets the user remove
+   ANY element just by clearing its field. (Auto elements such as the date and
+   "طبعة اليوم" have their own show/hide toggles in the controls.) */
+#view-poster .poster-stage .is-ph { display: none !important; }
 
 /* ---- footer ---- */
 #view-poster .poster-footer {

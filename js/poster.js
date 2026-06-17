@@ -56,6 +56,8 @@
       newspaperSubtitle: s.newspaperSubtitle || 'جريدة كأس العالم اليومية',
       issue: s.issue || 'العدد ١ — السنة الأولى',
       posterDate: Store.todayISO(),
+      showDate: true,
+      showEdition: true,
       headline: '',
       subheadline: '',
       description: '',
@@ -143,6 +145,8 @@
       newspaperSubtitle: p.newspaperSubtitle || '',
       issue: p.issue || '',
       posterDate: p.posterDate || Store.todayISO(),
+      showDate: p.showDate !== false,
+      showEdition: p.showEdition !== false,
       headline: p.headline || '',
       subheadline: p.subheadline || '',
       description: p.description || '',
@@ -296,6 +300,16 @@
           field('psNewspaperSubtitle', 'العنوان الفرعي للجريدة', 'input', state.newspaperSubtitle, 'جريدة كأس العالم اليومية') +
           field('psPosterDate', 'تاريخ البوستر', 'date', state.posterDate, '') +
           fieldSpan('psIssue', 'السنة / رقم العدد', 'input', state.issue, 'العدد ١ — السنة الأولى') +
+        '</div>' +
+
+        // show/hide toggles for the auto masthead elements
+        '<div class="field">' +
+          '<span class="field-label">عناصر الترويسة</span>' +
+          '<div class="ps-checks">' +
+            '<label class="ps-check"><input type="checkbox" id="psShowDate"' + (state.showDate !== false ? ' checked' : '') + ' /> إظهار التاريخ</label>' +
+            '<label class="ps-check"><input type="checkbox" id="psShowEdition"' + (state.showEdition !== false ? ' checked' : '') + ' /> إظهار «طبعة اليوم»</label>' +
+          '</div>' +
+          '<span class="field-hint">لإخفاء أي عنصر آخر (العنوان الثانوي، الوصف، التعليقات…) امسح حقله وسيختفي تلقائيًا من البوستر.</span>' +
         '</div>' +
 
         '<hr class="divider" />' +
@@ -469,6 +483,10 @@
     bindText(container, 'psSecondDescription', 'secondDescription');
     bindText(container, 'psSecondImageCaption', 'secondImageCaption');
 
+    // masthead element visibility toggles
+    bindCheck(container, 'psShowDate', 'showDate');
+    bindCheck(container, 'psShowEdition', 'showEdition');
+
     // dropzones
     bindDropzone(container, 'psImage', 'image');
     bindDropzone(container, 'psSecondImage', 'secondImage');
@@ -530,6 +548,15 @@
     if (!el) return;
     el.addEventListener('input', function () {
       state[key] = el.value;
+      rebuildStage(container);
+    });
+  }
+
+  function bindCheck(container, id, key) {
+    var el = container.querySelector('#' + id);
+    if (!el) return;
+    el.addEventListener('change', function () {
+      state[key] = el.checked;
       rebuildStage(container);
     });
   }
@@ -685,7 +712,6 @@
 
     var name = placeholderText(state.newspaperName, 'اسم الجريدة');
     var subtitle = placeholderText(state.newspaperSubtitle, 'العنوان الفرعي للجريدة');
-    var issue = placeholderText(state.issue, 'العدد / السنة');
     var headline = placeholderText(state.headline, 'العنوان الرئيسي هنا');
     var subheadline = placeholderText(state.subheadline, 'العنوان الثانوي هنا');
     var description = placeholderText(state.description, 'اكتب نص الخبر المختصر هنا ليظهر في الجريدة بصياغة كلاسيكية أنيقة.');
@@ -695,6 +721,23 @@
     var secondCaption = placeholderText(state.secondImageCaption, 'تعليق الصورة الثانية');
 
     var dateStr = Store.formatDate(state.posterDate || Store.todayISO());
+
+    // Assemble the issue/date line from ONLY the parts that are present & enabled,
+    // so the user can hide the date / «طبعة اليوم», and an empty issue just drops
+    // out. If nothing remains, the whole line disappears.
+    var ilSegs = [];
+    if (state.showDate !== false && String(state.posterDate || '').trim()) {
+      ilSegs.push('<span class="poster-issueline__side">' + Store.escapeHtml(dateStr) + '</span>');
+    }
+    if (String(state.issue || '').trim()) {
+      ilSegs.push('<span class="poster-issueline__mid">' + Store.escapeHtml(state.issue) + '</span>');
+    }
+    if (state.showEdition !== false) {
+      ilSegs.push('<span class="poster-issueline__side">طبعة اليوم</span>');
+    }
+    var issuelineHtml = ilSegs.length
+      ? '<div class="poster-issueline">' + ilSegs.join('<span class="poster-issueline__rule"></span>') + '</div>'
+      : '';
 
     // ---- masthead (shared, varies by CSS per template) ----
     var bannerExtra = '';
@@ -710,13 +753,7 @@
         '<div class="poster-masthead__name' + (name.placeholder ? ' is-ph' : '') + fitClass(state.newspaperName, 18, 28) + '">' + name.html + '</div>' +
         '<div class="poster-rule poster-rule--double"></div>' +
         '<div class="poster-masthead__sub' + (subtitle.placeholder ? ' is-ph' : '') + '">' + subtitle.html + '</div>' +
-        '<div class="poster-issueline">' +
-          '<span class="poster-issueline__side">' + Store.escapeHtml(dateStr) + '</span>' +
-          '<span class="poster-issueline__rule"></span>' +
-          '<span class="poster-issueline__mid' + (issue.placeholder ? ' is-ph' : '') + '">' + issue.html + '</span>' +
-          '<span class="poster-issueline__rule"></span>' +
-          '<span class="poster-issueline__side">طبعة اليوم</span>' +
-        '</div>' +
+        issuelineHtml +
       '</header>';
 
     // ---- body, per template ----
@@ -1178,6 +1215,8 @@
       newspaperSubtitle: state.newspaperSubtitle,
       issue: state.issue,
       posterDate: state.posterDate || Store.todayISO(),
+      showDate: state.showDate !== false,
+      showEdition: state.showEdition !== false,
       headline: state.headline,
       subheadline: state.subheadline,
       description: state.description,

@@ -329,6 +329,8 @@
       newspaperSubtitle: (input.newspaperSubtitle || '').trim(),
       issue: (input.issue || '').trim(),
       posterDate: input.posterDate || todayISO(),
+      showDate: input.showDate !== false,
+      showEdition: input.showEdition !== false,
       headline: (input.headline || ''),
       subheadline: (input.subheadline || ''),
       description: (input.description || ''),
