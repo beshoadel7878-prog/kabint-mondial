@@ -4,7 +4,7 @@
  * NOTE: service workers only run over http(s); opening via file:// silently
  * skips registration (handled in app.js).
  * ========================================================================== */
-var CACHE = 'km-shell-v6';
+var CACHE = 'km-shell-v7';
 
 var ASSETS = [
   './',
@@ -94,11 +94,37 @@ self.addEventListener('fetch', function (e) {
   try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return; // ignore cross-origin
 
-  // Cache-first, fall back to network, and cache new same-origin GETs
-  // (e.g. the hashed font woff2 files) at runtime so offline keeps improving.
-  // ignoreSearch: index.html loads some assets with a `?v=` cache-bust query
-  // (e.g. poster.css?v=…). Without this the precached query-less copy would miss
-  // and a cold offline-first load would fail for those files.
+  var path = url.pathname || '';
+  var hasVersionQuery = url.search && url.search.indexOf('v=') >= 0;
+  var isNavigate = req.mode === 'navigate';
+  var isIndex = /\/index\.html$/.test(path) || /\/$/.test(path);
+  var isWorldCupData = /\/js\/worldcup-data\.js$/.test(path);
+
+  // Versioned assets and the World Cup data pack must be network-first.
+  // The previous cache-first + ignoreSearch behavior could keep serving an old
+  // worldcup-data.js even after index.html requested a newer ?v=... URL.
+  if (isNavigate || isIndex || hasVersionQuery || isWorldCupData) {
+    e.respondWith(
+      fetch(req, { cache: 'no-store' }).then(function (res) {
+        if (res && res.status === 200 && res.type === 'basic') {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { try { c.put(req, copy); } catch (e2) {} });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match(req, { ignoreSearch: false }).then(function (cached) {
+          if (cached) return cached;
+          return caches.match(req, { ignoreSearch: true }).then(function (fallback) {
+            if (fallback) return fallback;
+            if (isNavigate) return caches.match('./index.html');
+          });
+        });
+      })
+    );
+    return;
+  }
+
+  // Static app shell remains cache-first for offline support.
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then(function (cached) {
       if (cached) return cached;
@@ -109,7 +135,7 @@ self.addEventListener('fetch', function (e) {
         }
         return res;
       }).catch(function () {
-        if (req.mode === 'navigate') return caches.match('./index.html');
+        if (isNavigate) return caches.match('./index.html');
       });
     })
   );
