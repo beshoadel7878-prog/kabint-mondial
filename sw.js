@@ -4,7 +4,7 @@
  * NOTE: service workers only run over http(s); opening via file:// silently
  * skips registration (handled in app.js).
  * ========================================================================== */
-var CACHE = 'km-shell-v7';
+var CACHE = 'km-shell-v8';
 
 var ASSETS = [
   './',
