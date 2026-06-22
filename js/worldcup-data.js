@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  var FLAG_KEY = 'km_worldcup2026_summaries_loaded_v6';
+  var FLAG_KEY = 'km_worldcup2026_summaries_loaded_v7';
 
   var MATCH_SUMMARIES = [
     {
@@ -403,10 +403,10 @@
     {
       id: 'wc2026-uzbekistan-colombia-2026-06-17',
       title: 'كولومبيا تهزم أوزبكستان وتتصدر المجموعة بعد تعثر البرتغال',
-      matchName: 'أوزبكستان × كولومبيا',
-      teamA: 'أوزبكستان',
-      teamB: 'كولومبيا',
-      score: '1-3',
+      matchName: 'كولومبيا × أوزبكستان',
+      teamA: 'كولومبيا',
+      teamB: 'أوزبكستان',
+      score: '3-1',
       matchDate: '2026-06-17',
       stage: 'دور المجموعات',
       country: 'المجموعة K',
@@ -505,10 +505,10 @@
     {
       id: 'wc2026-scotland-morocco-2026-06-19',
       title: 'صيباري يضرب مبكرًا والمغرب يطفئ اندفاعة اسكتلندا',
-      matchName: 'اسكتلندا × المغرب',
-      teamA: 'اسكتلندا',
-      teamB: 'المغرب',
-      score: '0-1',
+      matchName: 'المغرب × اسكتلندا',
+      teamA: 'المغرب',
+      teamB: 'اسكتلندا',
+      score: '1-0',
       matchDate: '2026-06-19',
       stage: 'دور المجموعات',
       country: 'المجموعة C',
@@ -522,10 +522,10 @@
     {
       id: 'wc2026-turkey-paraguay-2026-06-19',
       title: 'باراجواي تصمد بعشرة لاعبين وتركيا تودع المونديال مبكرًا',
-      matchName: 'تركيا × باراجواي',
-      teamA: 'تركيا',
-      teamB: 'باراجواي',
-      score: '0-1',
+      matchName: 'باراجواي × تركيا',
+      teamA: 'باراجواي',
+      teamB: 'تركيا',
+      score: '1-0',
       matchDate: '2026-06-19',
       stage: 'دور المجموعات',
       country: 'المجموعة D',
@@ -607,10 +607,10 @@
     {
       id: 'wc2026-tunisia-japan-2026-06-21',
       title: 'اليابان تقسو على تونس برباعية في المباراة رقم 1000 بتاريخ كأس العالم',
-      matchName: 'تونس × اليابان',
-      teamA: 'تونس',
-      teamB: 'اليابان',
-      score: '0-4',
+      matchName: 'اليابان × تونس',
+      teamA: 'اليابان',
+      teamB: 'تونس',
+      score: '4-0',
       matchDate: '2026-06-21',
       stage: 'دور المجموعات',
       country: 'المجموعة F',
@@ -675,10 +675,10 @@
     {
       id: 'wc2026-new-zealand-egypt-2026-06-21',
       title: 'مصر تحقق أول فوز مونديالي في تاريخها بريمونتادا أمام نيوزيلندا',
-      matchName: 'نيوزيلندا × مصر',
-      teamA: 'نيوزيلندا',
-      teamB: 'مصر',
-      score: '1-3',
+      matchName: 'مصر × نيوزيلندا',
+      teamA: 'مصر',
+      teamB: 'نيوزيلندا',
+      score: '3-1',
       matchDate: '2026-06-21',
       stage: 'دور المجموعات',
       country: 'المجموعة G',
@@ -740,10 +740,12 @@
 
   function autoSeed() {
     if (!window.Store) return null;
-    if (hasAllSummaries()) {
-      try { localStorage.setItem(FLAG_KEY, '1'); } catch (e) {}
-      return null;
+    var currentPackLoaded = false;
+    try { currentPackLoaded = localStorage.getItem(FLAG_KEY) === '1'; } catch (e) {}
+    if (!currentPackLoaded) {
+      return loadSummaries({ force: true });
     }
+    if (hasAllSummaries()) return null;
     return loadSummaries();
   }
 
