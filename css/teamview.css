@@ -277,6 +277,7 @@
 /* ------------------------------ scoreboard ------------------------------ */
 #view-team .tv-scoreboard {
   display: flex;
+  direction: ltr;
   align-items: center;
   justify-content: center;
   gap: 16px;
@@ -287,6 +288,7 @@
 }
 #view-team .tv-team {
   flex: 1;
+  direction: rtl;
   text-align: center;
   font-family: var(--font-disp);
   font-weight: 800;
